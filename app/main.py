@@ -39,4 +39,59 @@ def health():
     return {"status": "ok"}
 
 
-@app.post("/api/authors")
+@app.post("/api/authors", response_model=AuthorRead, status_code=201)
+def create_author(author: AuthorCreate, db:Session=Depends(get_db))
+    db_author = AuthorDB(**author.model_dump())
+    db.add(db_author)
+    commit_or_rollback(db, "author already exists")
+    db.refresh(db_author)
+    return db_author 
+
+@app.get("/api/authors", response_model = list[AuthorRead], status_code=200)
+def list_authors(db: Session = Depends(get_db))
+    stmt = select(AuthorDB).order_by(AuthorDB.id)
+    result = db.execute(stmt)
+    authors = results.scalars().all()
+    return authors
+
+@app.get("/api/authors/{id}", response_model = list[AuthorRead], status_code=200)
+def get_authors(author.id: int, db:Session = Depends(get_db))
+    author = db.get(AuthorDB, author_id)
+    if not author
+        raise HTTPException(status_code=404, detail="author not found")
+    return authors
+
+@app.delete("/api/authors/{author.id}", status_code=204)
+def delete_author(authors.id: int, db: Session = Depends(get_db)) -> Response:
+    author = db.get(AuthorDB, Author_id)
+    if not author
+        raise HTTPException(status_code=404, detail="author not found, no author deleted")
+    db.delete
+    db.commit
+    return Response(status_code = status.HTTP_204_NO_CONTENT)
+
+@app.post("/api/books", response_model=BookRead, status_code=201)
+def create_book(book: BookCreate, db:Session=Depends(get_db))
+    author = db.get(AuthorDB, author.author_id)
+    if not author:
+        raise HTTPException(status_code=404, detail="author not found")
+    book = BookDB(
+        name = book.name,
+        title = book.title
+        author_id = book.author_id
+    )
+    db.add(books)
+    commit_or_rollback(db, "book creation failed")
+    db.refresh(book)
+    return(book)
+
+@app.get("/api/books",response_model = list[BookRead], status_code=201)
+def list_book(db: Session = Depends(get_db)):
+    stmt = select(BookDB).order_by(BookDB.id)
+    return db.execute(stmt).scalars()all()
+
+@app.get("/api/books/{id}", response_model=[BookRead])
+def get_books(author_id: int, db: Session = Depends(get_db))
+    if not books:
+        raise HTTPException(status_code=404, detail="book not found")
+    return books

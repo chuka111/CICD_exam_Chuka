@@ -38,3 +38,5 @@ def get_db():
 def health():
     return {"status": "ok"}
 
+
+@app.post("/api/authors")
